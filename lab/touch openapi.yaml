@@ -1,0 +1,107 @@
+openapi: 3.0.3
+info:
+  title: Subscriber API
+  version: 1.0.0
+  description: API для керування підписниками та підписками з авторизацією через Keycloak
+
+servers:
+  - url: http://localhost:8000/api
+
+paths:
+  /subscribers:
+    get:
+      summary: Отримати список підписників
+      security:
+        - KeycloakClientCredentials:
+            - ProductsApiViewer
+      responses:
+        '200':
+          description: Список підписників
+
+    post:
+      summary: Створити нового підписника
+      security:
+        - KeycloakClientCredentials:
+            - ProductsApiWriter
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Subscriber'
+      responses:
+        '201':
+          description: Підписника створено
+
+  /subscriptions:
+    get:
+      summary: Отримати список підписок
+      security:
+        - KeycloakClientCredentials:
+            - ProductsApiViewer
+      responses:
+        '200':
+          description: Список підписок
+
+    post:
+      summary: Створити нову підписку
+      security:
+        - KeycloakClientCredentials:
+            - ProductsApiWriter
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Subscription'
+      responses:
+        '201':
+          description: Підписку створено
+
+components:
+  securitySchemes:
+    KeycloakClientCredentials:
+      type: oauth2
+      flows:
+        clientCredentials:
+          tokenUrl: http://localhost:8081/realms/Ivan/protocol/openid-connect/token
+          scopes:
+            ProductsApiViewer: Доступ до перегляду
+            ProductsApiWriter: Доступ до редагування
+
+    KeycloakAuthCode:
+      type: oauth2
+      flows:
+        authorizationCode:
+          authorizationUrl: http://localhost:8081/realms/Ivan/protocol/openid-connect/auth
+          tokenUrl: http://localhost:8081/realms/Ivan/protocol/openid-connect/token
+          scopes:
+            ProductsApiViewer: Доступ до перегляду
+            ProductsApiWriter: Доступ до редагування
+
+  schemas:
+    Subscriber:
+      type: object
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+        phone:
+          type: string
+
+    Subscription:
+      type: object
+      properties:
+        subscriber_id:
+          type: integer
+        plan:
+          type: string
+        start_date:
+          type: string
+          format: date
+        end_date:
+          type: string
+          format: date
+        is_active:
+          type: boolean
